@@ -23,9 +23,9 @@ output application/json
 {
    "username": payload.username,
    "fullName": payload.fullname,
-   "birthdate": payload.birthday,
+   "birthdate": payload.birthday as Date {format: 'dd-MM-yyyy'} as String {format: 'yyyy-MM-dd'},
    "gender":if(upper(payload.gender) == "MALE")"m" else "f", 
-   "dateRegistered":"2021-01-01"
+   "dateRegistered": payload.dateRegistered as Date {format: 'dd-MM-yyyy'} as String {format: 'yyyy-MM-dd'}
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
@@ -40,7 +40,7 @@ output application/json
 			<ee:variables>
 					<ee:set-variable variableName="isNoErrorUponDateValidation" ><![CDATA[%dw 2.0
 output application/json
-fun validDate(d) = if (d == d as Date {format: "yyyy-MM-dd"} as String {format: "yyyy-MM-dd"} ) d else null
+fun validDate(d) = if (d == d as Date {format: "dd-MM-yyyy"} as String {format: "dd-MM-yyyy"} ) d else null
 var dateRegisteredValidity = validDate(payload.dateRegistered)
 var birthdateValidity = validDate(payload.birthday)
 ---
@@ -137,7 +137,7 @@ var currentDate = now() as Date{format:"yyyy-MM-dd"}
 	fullname: payload.fullName,
 	age : between(currentDate,birthday).years,
 	gender : if(upper(payload.gender) == 'm')"male" else "female",
-	dateRegistered : payload.dateRegistered as DateTime as Date
+	dateRegistered : payload.dateRegistered as DateTime as Date as String {format: 'dd-MM-yyyy'}
 }]]></ee:set-payload>
 			</ee:message>
 			<ee:variables >
@@ -183,7 +183,7 @@ fun getAge(birthdate) = between(currentDate,birthdate as DateTime as Date{format
 		(payload mapObject (value,key) -> {
 			(age : getAge(value)) if(key as String == 'birthday'),
 			(gender : if(upper(value) == "M")"male" else "female") if(key as String == 'gender'),
-			(dateRegistered : value as DateTime as Date) if(key as String == 'dateRegistered'),
+			(dateRegistered : value as DateTime as Date as String {format: 'dd-MM-yyyy'}) if(key as String == 'dateRegistered'),
 			((key):value) if(key as String !='birthday' 
 				and key as String != 'isActive'
 				and key as String != 'accountId'

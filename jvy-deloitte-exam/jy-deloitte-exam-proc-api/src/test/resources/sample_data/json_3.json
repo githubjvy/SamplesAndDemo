@@ -1,0 +1,27 @@
+{
+    "count": 2,
+    "pageSize": "10",
+    "pageNumber": "1",
+    "users": [
+        {
+            "birthday": "1994-01-06T00:00:00",
+            "accountId": 101,
+            "gender": "f",
+            "isActive": true,
+            "fullName": "Kaira Yabut",
+            "userId": 1001,
+            "dateRegistered": "2021-01-01T00:00:00",
+            "username": "kairayabut"
+        },
+        {
+            "birthday": "1994-01-06T00:00:00",
+            "accountId": 102,
+            "gender": "f",
+            "isActive": true,
+            "fullName": "Kaira Yabut",
+            "userId": 1002,
+            "dateRegistered": "2021-01-01T00:00:00",
+            "username": "kairalyabut2"
+        }
+    ]
+}

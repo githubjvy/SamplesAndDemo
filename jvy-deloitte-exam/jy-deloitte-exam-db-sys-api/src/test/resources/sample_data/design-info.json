@@ -1,0 +1,8 @@
+{
+  "sampleData": {
+    "0c1278d9-2464-4b55-8651-adf235686a31": {
+      "payload": "sample_data/json.json",
+      "attributes": "sample_data/defaultvoidtype.dwl"
+    }
+  }
+}

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	
+	<sub-flow name="jy-deloitte-exam-exp-api-impl:\post-user-main-orchestration" doc:id="ad56ef7f-e68f-4baa-99ec-669830b9f32a" >
+		<logger level="INFO" doc:name="Log Start" doc:id="ef745893-8415-4539-b6e7-a98db648968f" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\post-user-main-orchestration | START | Request : #[message.payload]" />
+		<flow-ref doc:name="jy-deloitte-exam-exp-api-service:\invoke-post-user-proc-api" doc:id="cc77fa5c-0544-4762-a4db-3e637bef6ef6" name="jy-deloitte-exam-exp-api-service:\invoke-post-user-proc-api"/>
+		<logger level="INFO" doc:name="Log End" doc:id="5e1d0e34-9883-4a05-9dd3-6e40bd98d58b" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\post-user-main-orchestration | END | Response : #[message.payload]" />
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-exp-api-impl:\post-users-main-orchestration" doc:id="f50cc783-d903-4b2b-bcb3-0176bc6f3d68" >
+		<logger level="INFO" doc:name="Log Start" doc:id="3c94921a-a101-46fb-8231-f3f26c1478a8" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\post-users-main-orchestration | START | Request : #[message.payload]" />
+		<async doc:name="Async" doc:id="21cd9ff0-6cfe-46de-9f83-3f703fe13568" >
+			<flow-ref doc:name="jy-deloitte-exam-exp-api-service:\invoke-post-users-proc-api" doc:id="ab3c1bb7-d5c9-45aa-bc60-1ac25f24b6eb" name="jy-deloitte-exam-exp-api-service:\invoke-post-users-proc-api" />
+		</async>
+		<ee:transform doc:name="Build Accepted Response" doc:id="5dc8ae24-8d57-41c4-b896-89fd93c4fc7b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Multiple Users for Creation has been processed"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+202]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log End" doc:id="8fab4b47-1e1e-45a9-9aaf-a57198655b14" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\post-users-main-orchestration | START | Response : #[message.payload]"/>
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-exp-api-impl:\get-user-by-username-main-orchestration" doc:id="dd82435a-bd13-4c07-83de-2b0b6ed4b775" >
+		<logger level="INFO" doc:name="Log Start" doc:id="b7fb368c-cea5-4241-81b9-9b84a30b51b5" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\get-user-by-username-main-orchestration | START" />
+		<set-variable value="#[attributes.uriParams.'username']" doc:name="Set username variable" doc:id="f17a09f6-caf6-4892-b1fe-ad2bcbe736fc" variableName="username"/>
+		<flow-ref doc:name="jy-deloitte-exam-exp-api-service:\invoke-get-user-by-username-proc-api" doc:id="c57da4c7-f83b-460b-a14f-b20b71826e62" name="jy-deloitte-exam-exp-api-service:\invoke-get-user-by-username-proc-api"/>
+		<logger level="INFO" doc:name="Log End" doc:id="fa7c4a25-4bfa-4ac2-a9f9-c04112b3f3b2" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\get-user-by-username-main-orchestration | END | Response : #[message.payload]" />
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-exp-api-impl:\get-users-main-orchestration" doc:id="d3de6f33-b1e5-44a3-bd95-7a65e775cf06" >
+		<logger level="INFO" doc:name="Log Start" doc:id="4388927b-ffe7-40c0-b4d8-6290509dc509" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\get-users-main-orchestration | START" />
+		<flow-ref doc:name="jy-deloitte-exam-exp-api-impl:\validate-security-header" doc:id="a6ed7e09-fd0a-429d-85ff-536433027af6" name="jy-deloitte-exam-exp-api-impl:\validate-security-header" />
+		<ee:transform doc:name="Set queryParameters Variable Map" doc:id="b60a5184-1880-4074-8949-55b53655f4e8" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queryParameters" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	pageSize:attributes.queryParams.'pageSize',
+	pageNumber:attributes.queryParams.'pageNumber',
+	show_all:attributes.queryParams.'show_all'
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="jy-deloitte-exam-exp-api-service:\invoke-get-users-proc-api" doc:id="4f329e2b-feff-4cf1-ac81-957fbc9266da" name="jy-deloitte-exam-exp-api-service:\invoke-get-users-proc-api"/>
+		<logger level="INFO" doc:name="Log End" doc:id="f33457e6-2d09-46cb-b1ae-1671ea5b748c" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\get-users-main-orchestration | END | Response : #[message.payload]" />
+	</sub-flow>
+	<flow name="jy-deloitte-exam-exp-api-impl:\validate-auth-header" doc:id="c3a25c9a-3abc-46e1-b969-5770a1e1593d" >
+		<logger level="INFO" doc:name="Log Start" doc:id="14cc033c-6909-40f1-b466-e3a69a001ce3" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-auth-header | START | Checking Authorization Header"/>
+		<ee:transform doc:name="Check Authorization Header" doc:id="c0b386f7-ed1d-4285-8a3f-1b36a22b5ba7" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="authCheckResult" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.headers.Authorization == p('secure::http.auth')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="11f4c2c8-75e9-40c9-b96c-b746d560b4f9" >
+			<when expression="#[!vars.authCheckResult]">
+				<logger level="INFO" doc:name="Log Invalid Authorization Header" doc:id="041a6e82-a1cd-42ea-9ae2-5adac67e203d" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-auth-header | MID | Invalid Authorization Header"/>
+				<raise-error doc:name="Raise Auhorization Error" doc:id="79db9620-b7c9-4ae8-b9f3-687bf5931fde" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log Valid Authorization Header" doc:id="b0732d2e-fed4-47bb-baac-0bac1c32a1d2" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-auth-header | MID | Valid Authorization Header. Proceeding" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Log End" doc:id="e842b6fe-b13b-4e17-a4f6-13529dc1cd45" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-auth-header | End | Completed Authorization Check" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4ea9da0c-3718-47d4-a708-4d416e0821f2" type="USER:UNAUTHORIZED" >
+				<ee:transform doc:name="Build Error Message" doc:id="ceb2826c-35b1-4998-8e09-e55abfb35def" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unauthorized Authorization Token"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-exp-api-impl:\validate-security-header" doc:id="c3de28c0-1ea7-4253-8bce-f102850c7868" >
+		<logger level="INFO" doc:name="Log Start" doc:id="85cefc0f-ba2b-40a2-aa41-3d55671dad1c" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-security-header | START | Checking Security-Key Header"/>
+		<ee:transform doc:name="Check Security-Key Header" doc:id="8e953a9b-231b-438d-838d-d825faa85f4c" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="authCheckResult" ><![CDATA[%dw 2.0
+output application/java
+---
+sizeOf(attributes.headers."Security-Key") == 16]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="49f07e8d-9a2d-409c-be21-ed28318a5d9a" >
+			<when expression="#[!vars.authCheckResult]">
+				<logger level="INFO" doc:name="Log Invalid Security-Key Header" doc:id="648940d3-8c77-4eb2-8f44-8eda0888e2c7" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-security-header | MID | Invalid Security-Key Header"/>
+				<raise-error doc:name="Raise Auhorization Error" doc:id="00c7348e-66e7-4b62-85a3-fbe768e3e901" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log Valid Security-Key Header" doc:id="959b79a2-ae2f-416b-af73-0821a435d4b1" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-security-header | MID | Valid Security-Key Header. Proceeding" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Log End" doc:id="6a63f9dd-a5bb-4d06-bf14-776bb18fc2ca" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\validate-security-header | End | Completed Security-Key Check" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d5dbcfe9-8070-493d-86ce-e963234dd17e" type="USER:UNAUTHORIZED" >
+				<ee:transform doc:name="Build Error Message" doc:id="9fc00f3a-1cee-4940-8f84-5aed347b3a1c" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unauthorized Security-Key Token"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0a0bea2c-2db8-4c63-a93b-1e3a7ab8df75" >
+				<ee:transform doc:name="Build Error Message" doc:id="b9c76fb6-16b0-4197-9267-ed61f75665c3" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Security-Key Header Issue Found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		
+</error-handler>
+	</flow>
+	<sub-flow name="jy-deloitte-exam-exp-api-impl:\activate-user-main-orchestration" doc:id="988d667e-e291-41b4-91ed-651a758fd2ae" >
+		<logger level="INFO" doc:name="Log Start" doc:id="4112f4a3-1068-4eb9-996b-f3f452d7f037" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\activate-user-main-orchestration | START | Activating User" />
+		<set-variable value="#[attributes.uriParams.'username']" doc:name="Set username variable" doc:id="ba5a3136-3c40-4dfb-bfd6-6078fa18fbcf" variableName="username" />
+		<ee:transform doc:name="Build Request Payload" doc:id="755c1993-362b-4dc0-ad3b-57274b62a574" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	isActive:true
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="jy-deloitte-exam-exp-api-service:\invoke-patch-user-by-username-proc-api" doc:id="6074c7be-d522-4698-bc24-30dd6d7940e9" name="jy-deloitte-exam-exp-api-service:\invoke-patch-user-by-username-proc-api"/>
+		<ee:transform doc:name="Build Response Payload" doc:id="e5218802-4ea2-4fc4-9467-6cc6c39c242d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message:"Username : " ++ vars.username ++ " has been activated."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log End" doc:id="ecbc7979-ad84-4dd1-a9c9-56430ebfad86" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\activate-user-main-orchestration | START | Activated User : #[vars.username]" />
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-exp-api-impl:\deactivate-user-main-orchestration" doc:id="ec9f9288-25a9-4f44-917f-7a7d1c605518" >
+		<logger level="INFO" doc:name="Log Start" doc:id="53e80a5c-6452-4b06-aa9e-df8148e0813a" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\deactivate-user-main-orchestration | START | Activating User" />
+		<set-variable value="#[attributes.uriParams.'username']" doc:name="Set username variable" doc:id="5837b3c3-65ad-4519-9b4d-7762879d120e" variableName="username" />
+		<ee:transform doc:name="Build Request Payload" doc:id="baaa1a23-04e5-43bf-9e77-c0a3e8dfb76f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	isActive:false
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="jy-deloitte-exam-exp-api-service:\invoke-patch-user-by-username-proc-api" doc:id="1cf0d702-f58a-48d8-b276-aa1a26b57abb" name="jy-deloitte-exam-exp-api-service:\invoke-patch-user-by-username-proc-api"/>
+		<ee:transform doc:name="Build Response Payload" doc:id="83107155-e83b-4c97-95ec-26cb34edc43c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message:"Username : " ++ vars.username ++ " has been deactivated."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log End" doc:id="ba9cda47-a668-4200-95d0-c6a6b093e010" message="#[vars.logCorrId] | jy-deloitte-exam-exp-api-impl:\deactivate-user-main-orchestration | START | Activated User : #[vars.username]" />
+	</sub-flow>
+</mule>

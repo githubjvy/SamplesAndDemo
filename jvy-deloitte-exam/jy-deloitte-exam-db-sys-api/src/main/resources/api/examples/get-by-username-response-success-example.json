@@ -1,0 +1,10 @@
+{
+   "accountId" : 1001,
+   "userId": 101,
+   "username":"user2",
+   "fullName":"JY Yabut",
+   "birthday":"01-02-1990",
+   "gender":"male",
+   "isActive":true,
+   "dateRegistered":"21-08-2012"
+}

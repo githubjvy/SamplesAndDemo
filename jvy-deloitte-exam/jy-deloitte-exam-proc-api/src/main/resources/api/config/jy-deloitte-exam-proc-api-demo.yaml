@@ -1,0 +1,10 @@
+http:
+    host: "localhost"
+    port: "8082"
+    auth: "![LpopKkCQQYRrstcqRhMolECxgBxUzNU+]"
+system:
+    api:
+      auth: "![LpopKkCQQYRrstcqRhMolECxgBxUzNU+]"
+      sec: "![lCZAUpxec37PpNzoNzD+tegP2tQegB3f]"
+      host: "localhost"
+      port: "8083"

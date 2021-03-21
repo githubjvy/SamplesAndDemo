@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string"
+    },
+    "fullName": {
+      "type": "string"
+    },
+    "birthdate": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "active": {
+      "type": "integer",
+      "enum": [0,1]
+    },
+    "dateRegistered": {
+      "type": "string"
+    }
+  },
+  "additionalProperties" : false
+}

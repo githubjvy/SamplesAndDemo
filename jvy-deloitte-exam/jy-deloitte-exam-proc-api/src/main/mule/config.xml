@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="5dc5113a-f94f-4ad0-b228-2060736ec2a7" file="api\config\jy-deloitte-exam-proc-api-demo.yaml" key="${mule.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<http:listener-config name="jy-deloitte-exam-proc-api-httpListenerConfig">
+        <http:listener-connection host="${secure::http.host}" port="${secure::http.port}" />
+    </http:listener-config>
+	<http:request-config name="DB_System_API_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="b179aa48-1e42-40cb-9306-6c04db6b8270" basePath="/api/v1" >
+		<http:request-connection host="${secure::system.api.host}" port="${secure::system.api.port}" />
+		<http:default-headers >
+			<http:default-header key="Authorization" value="#[p('secure::system.api.auth')]" />
+			<http:default-header key="correlation-id" value="#[vars.logCorrId]" />
+		</http:default-headers>
+	
+</http:request-config>
+</mule>

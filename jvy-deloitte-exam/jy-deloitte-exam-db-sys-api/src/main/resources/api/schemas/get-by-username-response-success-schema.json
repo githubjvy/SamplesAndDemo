@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+  	"accountId": {
+      "type": "integer"
+    },
+    "userId": {
+      "type": "integer"
+    },
+    "username": {
+      "type": "string"
+    },
+    "fullName": {
+      "type": "string"
+    },
+    "birthday": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "isActive": {
+      "type": "boolean"
+    },
+    "dateRegistered": {
+      "type": "string"
+    }
+  },
+  "required": [
+  	"accountId",
+  	"userId",
+    "username",
+    "fullName",
+    "birthday",
+    "gender",
+    "isActive",
+    "dateRegistered"
+  ]
+}

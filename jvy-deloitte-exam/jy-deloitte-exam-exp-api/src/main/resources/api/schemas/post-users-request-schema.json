@@ -1,0 +1,73 @@
+{
+	"definitions": {},
+	"$schema": "http://json-schema.org/draft-07/schema#", 
+	"$id": "https://example.com/object1616267952.json", 
+	"title": "Root", 
+	"type": "array",
+	"default": [],
+	"items":{
+		"$id": "#root/items", 
+		"title": "Items", 
+		"type": "object",
+		"required": [
+			"username",
+			"fullname",
+			"birthday",
+			"gender",
+			"dateRegistered"
+		],
+		"properties": {
+			"username": {
+				"$id": "#root/items/username", 
+				"title": "Username", 
+				"type": "string",
+				"default": "",
+				"examples": [
+					"jeromevyabut"
+				],
+				"pattern": "^.*$"
+			},
+			"fullname": {
+				"$id": "#root/items/fullname", 
+				"title": "Fullname", 
+				"type": "string",
+				"default": "",
+				"examples": [
+					"Jerome Yabut"
+				],
+				"pattern": "^.*$"
+			},
+			"birthday": {
+				"$id": "#root/items/birthdate", 
+				"title": "Birthdate", 
+				"type": "string",
+				"default": "",
+				"examples": [
+					"1994-01-06"
+				],
+				"pattern": "^.*$"
+			},
+			"gender": {
+				"$id": "#root/items/gender", 
+				"title": "Gender", 
+				"type": "string",
+				"default": "",
+				"examples": [
+					"male"
+				],
+				"pattern": "^.*$"
+			},
+			"dateRegistered": {
+				"$id": "#root/items/dateRegistered", 
+				"title": "Dateregistered", 
+				"type": "string",
+				"default": "",
+				"examples": [
+					"2021-01-01"
+				],
+				"pattern": "^.*$"
+			}
+		}
+	}
+
+}

@@ -1,0 +1,66 @@
+{
+	"definitions": {},
+	"$schema": "http://json-schema.org/draft-07/schema#", 
+	"$id": "https://example.com/object1616269967.json", 
+	"title": "Root", 
+	"type": "object",
+	"required": [
+		"username",
+		"fullname",
+		"birthday",
+		"gender",
+		"dateRegistered"
+	],
+	"properties": {
+		"username": {
+			"$id": "#root/username", 
+			"title": "Username", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"jeromevyabut"
+			],
+			"pattern": "^.*$"
+		},
+		"fullname": {
+			"$id": "#root/fullname", 
+			"title": "Fullname", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"Jerome Yabut"
+			],
+			"pattern": "^.*$"
+		},
+		"birthday": {
+			"$id": "#root/birthday", 
+			"title": "Birthday", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"1994-01-06"
+			],
+			"pattern": "^.*$"
+		},
+		"gender": {
+			"$id": "#root/gender", 
+			"title": "Gender", 
+			"type": "string",
+            "enum":["male","female"],
+			"examples": [
+				"male"
+			],
+			"pattern": "^.*$"
+		},
+		"dateRegistered": {
+			"$id": "#root/dateRegistered", 
+			"title": "Dateregistered", 
+			"type": "string",
+			"default": "",
+			"examples": [
+				"2021-01-01"
+			],
+			"pattern": "^.*$"
+		}
+	}
+}

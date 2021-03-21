@@ -1,0 +1,11 @@
+http:
+    host: "localhost"
+    port: "8083"
+    auth: "![LpopKkCQQYRrstcqRhMolECxgBxUzNU+]"
+db:
+    host: "![QOKMZIHESlZc+cpyxynIkg==]"
+    port: "1433"
+    user: "![tDjtFTGSO3Y=]"
+    password: "![fzqXSM+JJCd83w8zWiz+tA==]"
+    name: "![p6Nl3dj6nVMRxa/zpXvwQA==]"
+    instance: "![p6Nl3dj6nVMRxa/zpXvwQA==]"

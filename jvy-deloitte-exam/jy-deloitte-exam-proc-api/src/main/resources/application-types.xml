@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="sample" format="json">
+      <types:shape format="weave" example="api/examples/get-users-response-success-example.json"><![CDATA[%dw 2.0
+
+type sample = {|
+  count: Number {"typeId": "int"}, 
+  pageNumber: Number {"typeId": "int"}, 
+  pageSize: Number {"typeId": "int"}, 
+  users: Array<{|    username: String,     fullname: String,     age: Number {"typeId": "int"},     gender: String,     dateRegistered: String  |}>
+|} {"example": "{\\\"count\\\":2,\\\"pageNumber\\\":1,\\\"pageSize\\\":10,\\\"users\\\":[{\\\"username\\\":\\\"user1\\\",\\\"fullname\\\":\\\"Jerome Yabut\\\",\\\"age\\\":13,\\\"gender\\\":\\\"male\\\",\\\"dateRegistered\\\":\\\"20-08-2012\\\"},{\\\"username\\\":\\\"user2\\\",\\\"fullname\\\":\\\"JY Yabut\\\",\\\"age\\\":13,\\\"gender\\\":\\\"male\\\",\\\"dateRegistered\\\":\\\"21-08-2012\\\"}]}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#12da0284-17b5-455c-b2a6-813525c87cef">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="sample"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f25bd540-1814-4148-82f8-bc11557ee511"/>
+  <types:enrichment select="#4e3b312a-6e76-4fde-9ef0-1f5815731fd2"/>
+  <types:enrichment select="#26dae80e-43c6-47bb-9e34-f80e85d2c09e">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="sample"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#60cb9a4d-4978-4b3c-a71b-2c6c4c7e3267">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="sample"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

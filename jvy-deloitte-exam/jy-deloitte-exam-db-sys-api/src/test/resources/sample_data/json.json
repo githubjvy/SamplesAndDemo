@@ -1,0 +1,16 @@
+[
+ {
+ 	"accountId":"101",
+ 	"userId":"1001",
+ 	"username":"jeromevyabut",
+ 	"active" : false,
+ 	"date_registered" : "2020-01-01"
+ },
+ {
+ 	"accountId":"101",
+ 	"userId":"1001",
+ 	"username":"jeromevyabut",
+ 	"active" : true,
+ 	"date_registered" : "2020-01-01"
+ }
+]

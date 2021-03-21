@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api" doc:id="3d783f55-2ab6-41ed-8e76-ae65a4635ef9" >
+		<logger level="INFO" doc:name="Log Start" doc:id="55084e4d-c791-4bc9-a963-5aee6c9b3590" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api | START | Request : #[message.payload]" />
+		<http:request method="POST" doc:name="Invoke Create User" doc:id="ad3313e9-9d71-4944-a572-cdc502ff71fc" config-ref="DB_System_API_HTTP_Request_configuration" path="/user">
+		</http:request>
+		<logger level="INFO" doc:name="Log End" doc:id="335ea46e-418e-451e-bafa-06686db447ee" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api | END | Response : #[message.payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a401276e-efdd-4af4-8c88-589e31d8cfc1" type="HTTP:BAD_REQUEST">
+				<logger level="ERROR" doc:name="Log Error" doc:id="727bf0ff-885c-4e4e-be82-1138ff8bf822" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="258e7e90-7a56-471c-b4a8-52575fe010fa">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.errorMessage.payload.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="120cfb02-760c-43b0-aa66-3dfa9232867b">
+				<logger level="ERROR" doc:name="Log Error" doc:id="600f04c0-9ce4-4f7a-8c0d-a18f2f4608b7" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="f47fcae8-079d-4e55-ae83-a5cc4ef10cfb">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api" doc:id="f6e379ba-086f-4838-8171-3e3a77f54561" >
+		<logger level="INFO" doc:name="Log Start" doc:id="d0557462-4143-4596-9ccc-5c82eb1aeadc" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api | START | Request : #[message.payload]" />
+		<http:request method="POST" doc:name="Invoke Create User" doc:id="c8ae4ee1-5925-4109-a9df-9fe4c9d4d455" config-ref="Proc_API_HTTP_Request_configuration" path="/users/user" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlation-id" : vars.logCorrId
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Log End" doc:id="1424f613-1971-46e2-9080-86abeadfd6e6" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api | END | Response : #[message.payload]" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4de22421-2ef1-4755-9c41-793817e9797f" >
+				<ee:transform doc:name="Add currentUser to List of Failed Users" doc:id="883cf984-e9a5-4ad6-85d4-e2878e5c18d6">
+					<ee:message />
+					<ee:variables>
+						<ee:set-variable variableName="failedUserList"><![CDATA[%dw 2.0
+output application/json
+---
+vars.failedUserList << vars.currentUser]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api" doc:id="85562c47-26d7-48c3-942d-062d4e911202" >
+		<logger level="INFO" doc:name="Log Start" doc:id="f5da1717-7ee4-42d0-88e5-6dd8b0609887" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api | START | Request : #[message.payload]" />
+		<http:request method="GET" doc:name="Invoke Get User by Username" doc:id="32f60e21-68c2-4e6b-9258-82644e2b7e3a" config-ref="DB_System_API_HTTP_Request_configuration" path="/users/{username}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlation-id" : vars.logCorrId
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"username" : vars.username
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log End" doc:id="9198ae42-70a7-46d7-a7f6-10a3aad96a80" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api | END | Response : #[message.payload]" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2243a895-114c-444b-bf56-3f8031b8387f" type="HTTP:NOT_FOUND">
+				<logger level="ERROR" doc:name="Log Error" doc:id="9609177e-a6e8-4e0d-81aa-35060fa117e5" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="97e1c1fd-8dd7-474f-ba40-2b19c5e58ae3">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.errorMessage.payload.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="57c2c531-44e7-44bf-a032-59deeb07d845" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="10e7b68c-07f5-49b3-8646-7d398cbc5029" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="d07c60dc-f51f-4c56-a648-7c118e22b834" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api" doc:id="dfafff12-00b7-45fd-896f-9a9ec3708de5" >
+		<logger level="INFO" doc:name="Log Start" doc:id="d8e8259a-51bd-4c6d-b1a5-1eb778258b2c" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api | START | Request : #[message.payload]" />
+		<http:request method="GET" doc:name="Invoke Get Users" doc:id="0fa0bf56-9311-4b98-8bfe-b80135285f7e" config-ref="DB_System_API_HTTP_Request_configuration" path="/users" >
+			<http:headers ><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+	"Security-Key" : p('secure::system.api.sec')
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"pageSize" : vars.queryParameters.pageSize,
+	"show_all" : vars.queryParameters.show_all,
+	"pageNumber" : vars.queryParameters.pageNumber
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log End" doc:id="0651ae16-8576-4a56-a40a-60007c099633" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api | END | Response : #[message.payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="be204ae0-8fef-4b9d-b334-0032dad4f365" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="4ad32e96-94fe-42d4-b6e5-f8001158ef09" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="7e8f2de9-164b-4c59-92e1-001c39825ec1">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-proc-api-service:\invoke-patch-user-by-username-db-sys-api" doc:id="e1e537ff-d402-49d1-a3dc-b516567523fb" >
+		<logger level="INFO" doc:name="Log Start" doc:id="f233b28d-aa43-4f83-ae52-c30c475ad898" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-patch-user-by-username-db-sys-api | START | Request : #[message.payload]" />
+		<http:request method="PATCH" doc:name="Invoke Patch User by Username" doc:id="02c4a6c0-ae45-444a-9cd4-6f9f428ccb89" config-ref="DB_System_API_HTTP_Request_configuration" path="/users/{username}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	username : vars.username
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log End" doc:id="07da6f9b-c7a3-44de-9f68-5892b592af8f" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-patch-user-by-username-db-sys-api | END | Response : #[message.payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="53b580f0-3d96-48de-9ed7-a98c67222c24" type="HTTP:NOT_FOUND">
+				<logger level="ERROR" doc:name="Log Error" doc:id="4e89b1d5-71f0-41fb-be0e-a21597179cd4" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="fe153d22-8c6a-4a7b-87c3-2b9a56a88a1b">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.errorMessage.payload.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="85638dfc-fa27-4fd9-835d-7e7032ca8b4e" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="18bdbefe-806d-49f5-9dc7-000857a3b817" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-patch-user-by-username-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="ff4790ab-9a85-45b4-ab83-2d334e6a212f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

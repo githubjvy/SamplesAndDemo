@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="create-user-metadata" format="json">
+      <types:shape format="json-schema" location="api/schemas/post-user-request-schema.json"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#27ed023a-f919-4c35-b6e4-60c54e9b9e36">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="create-user-metadata"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#1002dcae-15a7-4017-b1c9-ff5ad20006bb"/>
+</types:mule>

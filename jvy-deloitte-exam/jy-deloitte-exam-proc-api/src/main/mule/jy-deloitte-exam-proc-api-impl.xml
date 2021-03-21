@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:request-config name="Proc_API_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="00866c27-dd6e-4947-9628-389ca04c2ce7" basePath="/api/v1" >
+		<http:request-connection host="${secure::http.host}" port="${secure::http.port}" />
+		<http:default-headers >
+			<http:default-header key="Authorization" value="${secure::http.auth}" />
+			<http:default-header key="correlation-id" value="#[vars.logCorrId]" />
+		</http:default-headers>
+	</http:request-config>
+	<sub-flow name="jy-deloitte-exam-proc-api-impl:\post-user-main-orchestration" doc:id="ad56ef7f-e68f-4baa-99ec-669830b9f32a" >
+		<logger level="INFO" doc:name="Log Start" doc:id="ef745893-8415-4539-b6e7-a98db648968f" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\post-user-main-orchestration | START | Request : #[message.payload]" />
+		<flow-ref doc:name="jy-deloitte-exam-proc-api-impl:\date-validation-utility" doc:id="00241f9f-9787-4d07-a1b3-2dde9817adce" name="jy-deloitte-exam-proc-api-impl:\date-validation-utility"/>
+		<ee:transform doc:name="Transform to Sys API Request Payload" doc:id="35f9c32d-dd88-4e0d-9b00-6f0783949357" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   "username": payload.username,
+   "fullName": payload.fullname,
+   "birthdate": payload.birthday,
+   "gender":if(upper(payload.gender) == "MALE")"m" else "f", 
+   "dateRegistered":"2021-01-01"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api" doc:id="cc77fa5c-0544-4762-a4db-3e637bef6ef6" name="jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api"/>
+		<logger level="INFO" doc:name="Log End" doc:id="5e1d0e34-9883-4a05-9dd3-6e40bd98d58b" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\post-user-main-orchestration | END | Response : #[message.payload]" />
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-proc-api-impl:\date-validation-utility" doc:id="d3c05a3d-9dda-436e-969d-6528d67cc3bf" >
+		<try doc:name="Try" doc:id="1e243610-2100-4840-89b7-7159aec29c6d" >
+			<ee:transform doc:name="Validate Dates" doc:id="12da0284-17b5-455c-b2a6-813525c87cef">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+					<ee:set-variable variableName="isNoErrorUponDateValidation" ><![CDATA[%dw 2.0
+output application/json
+fun validDate(d) = if (d == d as Date {format: "yyyy-MM-dd"} as String {format: "yyyy-MM-dd"} ) d else null
+var dateRegisteredValidity = validDate(payload.dateRegistered)
+var birthdateValidity = validDate(payload.birthday)
+---
+dateRegisteredValidity != null and birthdateValidity != null]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<choice doc:name="Check Date Validation Variable" doc:id="1a78cfb5-0c25-4e3a-be22-96625c691918" >
+				<when expression="#[!vars.isNoErrorUponDateValidation]">
+					<raise-error doc:name="Raise error" doc:id="056dd63b-23fb-403a-9ae5-baf4c74a95df" type="DATEFORMAT:INVALID_DATE_FORMAT" description="Either one of the birthday or dateRegistered has invalid values"/>
+				</when>
+				<otherwise >
+					<logger level="INFO" doc:name="Log Valid Dates" doc:id="fd6f8129-a62c-4b1c-8abc-49c3b5b1d611" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\date-validation-utility | MID | Dates are Valid" />
+				</otherwise>
+			</choice>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="47225b07-d95f-4eb7-9c16-0f80e166345a" >
+					<logger level="ERROR" doc:name="Log Error" doc:id="0420a4e5-8ffa-4609-8eab-1c651be4a4a2" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\date-validation-utility | ERROR | Detailed Error : #[error.detailedDescription]" />
+					<ee:transform doc:name="Build Date Validation Error Response" doc:id="6c8da379-12f9-4fd3-b8ce-2fddc0a57a29" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   internalErrorCode:"5001",
+   errorMessage: "Either one of the birthday or dateRegistered has invalid values"
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+400]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-proc-api-impl:\post-users-main-orchestration" doc:id="f50cc783-d903-4b2b-bcb3-0176bc6f3d68" >
+		<logger level="INFO" doc:name="Log Start" doc:id="3c94921a-a101-46fb-8231-f3f26c1478a8" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\post-users-main-orchestration | START | Request : #[message.payload]" />
+		<ee:transform doc:name="Initialize totalUsersToBeCreated and failedUserList Variable" doc:id="4e3b312a-6e76-4fde-9ef0-1f5815731fd2" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="failedUserList" ><![CDATA[%dw 2.0
+output application/java
+---
+[]]]></ee:set-variable>
+				<ee:set-variable variableName="totalUsersToBeCreated" ><![CDATA[%dw 2.0
+output application/java
+---
+sizeOf(payload)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="Iterate Each Request and Call POST Create User" doc:id="3d38711f-0293-4f2d-a140-ba81dca7e223" collection="payload">
+				<set-variable value="#[payload.username]" doc:name="Set currentUser" doc:id="7c95c981-19f9-40c7-9072-8966fbf79fa6" variableName="currentUser" />
+				<flow-ref doc:name="jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api" doc:id="61cba1c4-783b-4f8c-b0b8-2b01ea3c3390" name="jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api" />
+			</foreach>
+		<ee:transform doc:name="Build Response Payload" doc:id="d4dee8e6-d37e-4927-a2cf-0ea63deda30c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var totalCreatedUsers = vars.totalUsersToBeCreated - sizeOf(vars.failedUserList)
+---
+{
+	message : totalCreatedUsers as String ++ " of " ++ vars.totalUsersToBeCreated as String ++ " users has been created.",
+	failedUsers : vars.failedUserList
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+var isUserCreated = (vars.totalUsersToBeCreated - sizeOf(vars.failedUserList)) == 0
+---
+if(isUserCreated)400 else 201]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log End" doc:id="8fab4b47-1e1e-45a9-9aaf-a57198655b14" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\post-users-main-orchestration | START | Response : #[message.payload]"/>
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-proc-api-impl:\get-user-by-username-main-orchestration" doc:id="dd82435a-bd13-4c07-83de-2b0b6ed4b775" >
+		<logger level="INFO" doc:name="Log Start" doc:id="b7fb368c-cea5-4241-81b9-9b84a30b51b5" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\get-user-by-username-main-orchestration | START" />
+		<set-variable value="#[attributes.uriParams.'username']" doc:name="Set username variable" doc:id="f17a09f6-caf6-4892-b1fe-ad2bcbe736fc" variableName="username"/>
+		<flow-ref doc:name="jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api" doc:id="c57da4c7-f83b-460b-a14f-b20b71826e62" name="jy-deloitte-exam-proc-api-service:\invoke-get-user-by-username-db-sys-api"/>
+		<ee:transform doc:name="Build Response Payload and Status Code" doc:id="26dae80e-43c6-47bb-9e34-f80e85d2c09e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::Periods
+output application/json
+var birthday = (payload.birthday as DateTime) as Date{format:"yyyy-MM-dd"}
+var currentDate = now() as Date{format:"yyyy-MM-dd"}
+---
+{
+	username: payload.username,
+	fullname: payload.fullName,
+	age : between(currentDate,birthday).years,
+	gender : if(upper(payload.gender) == 'm')"male" else "female",
+	dateRegistered : payload.dateRegistered as DateTime as Date
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+200]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log End" doc:id="fa7c4a25-4bfa-4ac2-a9f9-c04112b3f3b2" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\get-user-by-username-main-orchestration | END | Response : #[message.payload]" />
+	</sub-flow>
+	<sub-flow name="jy-deloitte-exam-proc-api-impl:\get-users-main-orchestration" doc:id="d3de6f33-b1e5-44a3-bd95-7a65e775cf06" >
+		<logger level="INFO" doc:name="Log Start" doc:id="4388927b-ffe7-40c0-b4d8-6290509dc509" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\get-users-main-orchestration | START" />
+		<flow-ref doc:name="jy-deloitte-exam-proc-api-impl:\validate-security-header" doc:id="a6ed7e09-fd0a-429d-85ff-536433027af6" name="jy-deloitte-exam-proc-api-impl:\validate-security-header"/>
+		<ee:transform doc:name="Set queryParameters Variable Map" doc:id="b60a5184-1880-4074-8949-55b53655f4e8" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queryParameters" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	pageSize:attributes.queryParams.'pageSize',
+	pageNumber:attributes.queryParams.'pageNumber',
+	show_all:attributes.queryParams.'show_all'
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api" doc:id="4f329e2b-feff-4cf1-ac81-957fbc9266da" name="jy-deloitte-exam-proc-api-service:\invoke-get-users-db-sys-api"/>
+		<ee:transform doc:name="Build Response Payload" doc:id="60cb9a4d-4978-4b3c-a71b-2c6c4c7e3267" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::Periods
+output application/json
+var currentDate = now() as Date{format:"yyyy-MM-dd"}
+fun getAge(birthdate) = between(currentDate,birthdate as DateTime as Date{format:"yyyy-MM-dd"}).years
+---
+{
+	count:payload.count,
+	pageSize:payload.pageSize,
+	pageNumber:payload.pageNumber,
+	users : payload.users map (payload) -> {
+		(payload mapObject (value,key) -> {
+			(age : getAge(value)) if(key as String == 'birthday'),
+			(gender : if(upper(value) == "M")"male" else "female") if(key as String == 'gender'),
+			(dateRegistered : value as DateTime as Date) if(key as String == 'dateRegistered'),
+			((key):value) if(key as String !='birthday' 
+				and key as String != 'isActive'
+				and key as String != 'accountId'
+				and key as String != 'userId'
+				and key as String != 'dateRegistered'
+				and key as String != 'gender'
+			)
+		}) 
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log End" doc:id="f33457e6-2d09-46cb-b1ae-1671ea5b748c" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\get-users-main-orchestration | END | Response : #[message.payload]" />
+	</sub-flow>
+	<flow name="jy-deloitte-exam-proc-api-impl:\validate-auth-header" doc:id="c3a25c9a-3abc-46e1-b969-5770a1e1593d" >
+		<logger level="INFO" doc:name="Log Start" doc:id="14cc033c-6909-40f1-b466-e3a69a001ce3" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-auth-header | START | Checking Authorization Header"/>
+		<ee:transform doc:name="Check Authorization Header" doc:id="c0b386f7-ed1d-4285-8a3f-1b36a22b5ba7" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="authCheckResult" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.headers.Authorization == p('secure::http.auth')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="11f4c2c8-75e9-40c9-b96c-b746d560b4f9" >
+			<when expression="#[!vars.authCheckResult]">
+				<logger level="INFO" doc:name="Log Invalid Authorization Header" doc:id="041a6e82-a1cd-42ea-9ae2-5adac67e203d" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-auth-header | MID | Invalid Authorization Header"/>
+				<raise-error doc:name="Raise Auhorization Error" doc:id="79db9620-b7c9-4ae8-b9f3-687bf5931fde" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log Valid Authorization Header" doc:id="b0732d2e-fed4-47bb-baac-0bac1c32a1d2" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-auth-header | MID | Valid Authorization Header. Proceeding" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Log End" doc:id="e842b6fe-b13b-4e17-a4f6-13529dc1cd45" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-auth-header | End | Completed Authorization Check" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4ea9da0c-3718-47d4-a708-4d416e0821f2" type="USER:UNAUTHORIZED" >
+				<ee:transform doc:name="Build Error Message" doc:id="ceb2826c-35b1-4998-8e09-e55abfb35def" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unauthorized Authorization Token"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-proc-api-impl:\validate-security-header" doc:id="c3de28c0-1ea7-4253-8bce-f102850c7868" >
+		<logger level="INFO" doc:name="Log Start" doc:id="85cefc0f-ba2b-40a2-aa41-3d55671dad1c" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-security-header | START | Checking Security-Key Header"/>
+		<ee:transform doc:name="Check Security-Key Header" doc:id="8e953a9b-231b-438d-838d-d825faa85f4c" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="authCheckResult" ><![CDATA[%dw 2.0
+output application/java
+---
+sizeOf(attributes.headers."Security-Key") == 16]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="49f07e8d-9a2d-409c-be21-ed28318a5d9a" >
+			<when expression="#[!vars.authCheckResult]">
+				<logger level="INFO" doc:name="Log Invalid Security-Key Header" doc:id="648940d3-8c77-4eb2-8f44-8eda0888e2c7" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-security-header | MID | Invalid Security-Key Header"/>
+				<raise-error doc:name="Raise Auhorization Error" doc:id="00c7348e-66e7-4b62-85a3-fbe768e3e901" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log Valid Security-Key Header" doc:id="959b79a2-ae2f-416b-af73-0821a435d4b1" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-security-header | MID | Valid Security-Key Header. Proceeding" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Log End" doc:id="6a63f9dd-a5bb-4d06-bf14-776bb18fc2ca" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-security-header | End | Completed Security-Key Check" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d5dbcfe9-8070-493d-86ce-e963234dd17e" type="USER:UNAUTHORIZED" >
+				<ee:transform doc:name="Build Error Message" doc:id="9fc00f3a-1cee-4940-8f84-5aed347b3a1c" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unauthorized Security-Key Token"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0a0bea2c-2db8-4c63-a93b-1e3a7ab8df75" >
+				<ee:transform doc:name="Build Error Message" doc:id="b9c76fb6-16b0-4197-9267-ed61f75665c3" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Security-Key Header Issue Found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[401]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		
+</error-handler>
+	</flow>
+	<sub-flow name="jy-deloitte-exam-proc-api-impl:\patch-user-by-username-main-orchestration" doc:id="dcde1026-134f-4fd8-9743-f735ef811388" >
+		<logger level="INFO" doc:name="Log Start" doc:id="72efa39e-d5ac-4700-a006-07c0e50b85d1" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\patch-user-by-username-main-orchestration | START | Updating User" />
+		<set-variable value="#[attributes.uriParams.'username']" doc:name="Set username variable" doc:id="eae04450-2f20-47b6-a292-0fbef6054ee7" variableName="username" />
+		<ee:transform doc:name="Build Request Payload" doc:id="3f0595c0-7c83-4594-ad3a-09c9b8979d7c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	active:if(payload.isActive) 1 else 0
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="jy-deloitte-exam-proc-api-service:\invoke-patch-user-by-username-db-sys-api" doc:id="438cf004-3fb5-44e7-b0cb-53bfb6d4cb7e" name="jy-deloitte-exam-proc-api-service:\invoke-patch-user-by-username-db-sys-api"/>
+		<logger level="INFO" doc:name="Log End" doc:id="fd960d1a-e2fc-42e1-9d34-188f33f63950" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\patch-user-by-username-main-orchestration | START | Updated User : #[vars.username]" />
+	</sub-flow>
+</mule>

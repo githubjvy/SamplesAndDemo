@@ -1,0 +1,109 @@
+#%RAML 1.0
+title: jy-deloitte-exam-proc-api
+
+
+
+/v1:
+  /users : 
+    post:
+        description: Create Multiple Users
+        body:
+          application/json:
+            type: !include schemas/post-users-request-schema.json
+            example: !include examples/post-users-request-example.json
+    
+        responses:
+          201:
+            body:
+              application/json:
+                type: !include schemas/post-user-response-schema.json
+                example: !include examples/post-user-response-example.json
+    get:
+      description: Get All Users
+      queryParameters :
+        pageSize:
+          type: integer
+          required: false
+          minimum: 1
+          default: 10
+        pageNumber:
+          type: integer
+          required: false
+          minimum: 1
+          default: 1
+        show_all:
+          type: boolean
+          required: false
+          default: false
+        
+      responses:
+        200:
+          body:
+            application/json:
+              type: !include schemas/get-users-response-success-schema.json
+              example: !include examples/get-users-response-success-example.json
+        404: 
+          body:
+            application/json:
+              type: !include schemas/error-schema.json
+              example: !include examples/generic-not-found-example.json
+        500:
+          body:
+            application/json:
+              type: !include schemas/error-schema.json
+              example : !include examples/generic-error-example.json
+    /user: 
+      post:
+        description: Create User
+        body:
+          application/json:
+            type: !include schemas/post-user-request-schema.json
+            example: !include examples/post-user-request-example.json
+    
+        responses:
+          201:
+            body:
+              application/json:
+                type: !include schemas/post-user-response-schema.json
+                example: !include examples/post-user-response-example.json
+    /{username}:
+      patch:
+        description: Update a specific user
+        body:
+          application/json:
+            type: !include schemas/patch-user-request-schema.json
+            example: !include examples/patch-user-request-example.json
+        responses:
+          200:
+            body:
+              application/json:
+                type: !include schemas/patch-user-response-schema.json
+                example: !include examples/patch-user-response-example.json
+          404:
+            body:
+              application/json:
+                type: !include schemas/error-schema.json
+                example: !include examples/generic-not-found-example.json
+          500:
+            body:
+              application/json:
+                type: !include schemas/error-schema.json
+                example : !include examples/generic-error-example.json
+      get:
+        description: Get a specific user
+        responses:
+          200:
+            body:
+              application/json:
+                type: !include schemas/get-by-username-response-success-schema.json
+                example: !include examples/get-by-username-response-success-example.json
+          404:
+            body:
+              application/json:
+                type: !include schemas/error-schema.json
+                example: !include examples/generic-not-found-example.json
+          500:
+            body:
+              application/json:
+                type: !include schemas/error-schema.json
+                example : !include examples/generic-error-example.json

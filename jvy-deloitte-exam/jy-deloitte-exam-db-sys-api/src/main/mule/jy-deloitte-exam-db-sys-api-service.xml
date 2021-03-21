@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="jy-deloitte-exam-db-sys-api-service:\invoke-create-user-sp" doc:id="f93a744a-28e0-4ddb-a354-008a8cd8094e" >
+		<logger level="INFO" doc:name="Log Start" doc:id="e0ec81de-306b-4d8c-97f3-92ffad9ba6bb" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-create-user-sp | START | Request : #[message.payload]"/>
+		<db:stored-procedure doc:name="Invoke Create User Stored Procedure" doc:id="96d7861d-9796-4751-a8fa-447b7c540eba" config-ref="MSSQL_Database_Config">
+			<db:sql ><![CDATA[{CALL create_user(:fullName,:birthday,:gender,:username,:active,:date_registered)}]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:stored-procedure>
+		<logger level="INFO" doc:name="Log End" doc:id="c076083f-ba08-4bfa-ba20-3ab6311cf931" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-create-user-sp | END | DB User Creation Success" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Query Execution Errors" doc:id="95e767d4-2d34-4336-acda-030704a8e608" type="DB:QUERY_EXECUTION">
+				<logger level="ERROR" doc:name="Log Error" doc:id="618ed376-107b-4c6f-847c-82b78ce581ee" message="#[vars.logCorrId] |jy-deloitte-exam-db-sys-api-service:\invoke-create-user-sp | ERROR | Detailed Error : #[error.detailedDescription]"/>
+				<ee:transform doc:name="Build Query Execution Error Response" doc:id="7505e5df-c850-4193-9b01-1a4ab763261f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   internalErrorCode:"5001",
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Generic Errors" doc:id="3004da18-56b1-454c-b05d-1ef3e1249350" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="d1257df2-2e98-4bb5-8ff0-d30878406dd4" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-create-user-sp | ERROR | Detailed Error : #[error.detailedDescription]"/>
+				<ee:transform doc:name="Build Generic Error Response" doc:id="9f4284e2-c428-453f-9a06-c3f8e525a5e1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage:"Internal Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-db-sys-api-service:\invoke-get-user-by-username-sql" doc:id="0c0b9cc2-e52c-4385-a866-cfc5fd56062a" >
+		<logger level="INFO" doc:name="Log Start" doc:id="b3bba237-89a9-4394-be7d-88c682273484" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-user-by-username-sql | START | Request : #[message.payload]"/>
+		<db:query-single doc:name="Get User by Username" doc:id="4b045ef2-d0fa-4dc3-be02-ab178bcae09f" config-ref="MSSQL_Database_Config">
+			<db:sql><![CDATA[SELECT accountId , UserDetails.userId , username , active , date_registered , fullName, birthday, gender 
+FROM Accounts 
+INNER JOIN UserDetails ON Accounts.userId = UserDetails.userId 
+WHERE username = :username;]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'username': vars.username}]]]></db:input-parameters>
+		</db:query-single>
+		<logger level="INFO" doc:name="Log End" doc:id="d4a1d854-ba87-4cc2-9fb4-c5e2ae5dc926" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-user-by-username-sql | END | DB User Retrieval Success" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Query Execution Errors" doc:id="54258009-a319-4b0d-a2f2-587990923eca" type="DB:QUERY_EXECUTION">
+				<logger level="ERROR" doc:name="Log Error" doc:id="53e32159-f590-4c63-a886-9d20211ef4be" message="#[vars.logCorrId] |jy-deloitte-exam-db-sys-api-service:\invoke-get-user-by-username-sql | ERROR | Detailed Error : #[error.detailedDescription]"/>
+				<ee:transform doc:name="Build Query Execution Error Response" doc:id="4756fa24-3dd0-4cca-9a9f-14c55acbb46e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   internalErrorCode:"5001",
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Generic Errors" doc:id="215537f4-d06d-452b-bf7b-fcc6cd9867d1" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="b397299f-12df-46b2-a303-0f8f55586ec1" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-user-by-username-sql | ERROR | Detailed Error : #[error.detailedDescription]"/>
+				<ee:transform doc:name="Build Generic Error Response" doc:id="1b43a496-38fb-4caa-897d-d47b3af99e92" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage:"Internal Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		
+</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-db-sys-api-service:\invoke-get-users-sql" doc:id="298640f7-98a3-4027-9d97-529b0cd24de3" >
+		<logger level="INFO" doc:name="Log Start" doc:id="0d6476f0-8136-4dbf-8071-2ca1cc5e7bf2" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-users-sql | START | Retrieving All Users" />
+		<choice doc:name="Determine to show all" doc:id="2d497fdb-99ec-4cfd-85a1-44ac4e64f5c7" >
+			<when expression="#[vars.queryParamsInput.showAll]">
+				<db:select doc:name="Get All Users" doc:id="fdfb2435-96b9-40c8-b0ea-093d57975a55" config-ref="MSSQL_Database_Config" >
+					<db:sql ><![CDATA[SELECT accountId , UserDetails.userId , username , active , date_registered , fullName, birthday, gender 
+FROM Accounts 
+INNER JOIN UserDetails 
+ON Accounts.userId = UserDetails.userId 
+ORDER BY accountId
+OFFSET :pageSize * (:pageNumber - 1) ROWS 
+FETCH NEXT :pageSize ROWS ONLY ;
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	pageSize: attributes.queryParams.pageSize as Number,
+	pageNumber: attributes.queryParams.pageNumber as Number
+}]]]></db:input-parameters>
+				</db:select>
+			</when>
+			<otherwise >
+				<db:select doc:name="Get Active Users" doc:id="88000c43-6482-43be-b018-4fa520981397" config-ref="MSSQL_Database_Config">
+			<db:sql><![CDATA[SELECT accountId , UserDetails.userId , username , active , date_registered , fullName, birthday, gender 
+FROM Accounts 
+INNER JOIN UserDetails 
+ON Accounts.userId = UserDetails.userId 
+WHERE active = 1
+ORDER BY accountId
+OFFSET :pageSize * (:pageNumber - 1) ROWS 
+FETCH NEXT :pageSize ROWS ONLY ;
+]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	pageSize: attributes.queryParams.pageSize as Number,
+	pageNumber: attributes.queryParams.pageNumber as Number
+}]]]></db:input-parameters>
+		</db:select>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Log End" doc:id="276d240f-29ba-4bc1-a568-0e21a6f58fb2" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-users-sql | END | DB User Retrieval Success" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Query Execution Errors" doc:id="9a40e7a8-34cf-4ee8-aea2-1568fbac8a0b" type="DB:QUERY_EXECUTION">
+				<logger level="ERROR" doc:name="Log Error" doc:id="604bb757-7b86-4fab-a768-5e21635c47d8" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-users-sql | ERROR | Detailed Error : #[error.detailedDescription]"/>
+				<ee:transform doc:name="Build Query Execution Error Response" doc:id="dca95a84-bd37-477e-8682-8d3b1f4f5272" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   internalErrorCode:"5001",
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Generic Errors" doc:id="5e945404-7058-4cfc-930f-50be7c23716b" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="1e50d68b-ae56-4da2-bf43-fe3313aed710" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-users-sql | ERROR | Detailed Error : #[error.detailedDescription]"/>
+				<ee:transform doc:name="Build Generic Error Response" doc:id="c8e89ebd-300b-4251-8bac-7c797392cf74" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage:"Internal Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="jy-deloitte-exam-db-sys-api-service:\invoke-update-user-by-username-sql" doc:id="86e5e9af-b9e0-4a00-900e-a7df48c93c3f" >
+		<logger level="INFO" doc:name="Log Start" doc:id="2da4fa08-ca36-42c2-b62a-86cc449a4cd0" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-patch-user-by-username-db-sys-api | START | Request : #[message.payload]" />
+		<db:update doc:name="Update User" doc:id="05b89684-5460-4c3d-991d-03a5f653d25e" config-ref="MSSQL_Database_Config">
+			<db:sql ><![CDATA[UPDATE Accounts SET active = :active WHERE username = :username;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+'username': vars.username,
+'active': payload.active
+}]]]></db:input-parameters>
+		</db:update>
+		<logger level="INFO" doc:name="Log End" doc:id="53a51472-3a58-416f-a54c-660589ff9a7f" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-patch-user-by-username-db-sys-api | END | Response : #[message.payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="260386db-d61d-4b28-826e-f6cc778bfd61" >
+				<logger level="ERROR" doc:name="Log Error" doc:id="111bfa47-a698-440c-8eb2-bdd71e2aaf55" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-patch-user-by-username-db-sys-api | ERROR | Detailed Error : #[error.detailedDescription]" />
+				<ee:transform doc:name="Build Error Response Payload" doc:id="fe702c22-e596-418e-8851-d2a6281b24ff" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+   errorMessage: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

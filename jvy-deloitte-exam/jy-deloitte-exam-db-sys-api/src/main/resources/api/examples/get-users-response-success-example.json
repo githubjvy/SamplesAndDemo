@@ -1,0 +1,23 @@
+{
+   "count":2,
+   "pageNumber":1,
+   "pageSize":10,
+   "users":[
+      {
+         "username":"user1",
+         "fullName":"Jerome Yabut",
+         "birthday":"01-01-1990",
+         "gender":"male",
+         "isActive" : true,
+         "dateRegistered":"20-08-2012"
+      },
+      {
+         "username":"user2",
+         "fullName":"JY Yabut",
+         "birthday":"01-02-1990",
+         "gender":"male",
+         "isActive" : true,
+         "dateRegistered":"21-08-2012"
+      }
+   ]
+}

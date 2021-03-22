@@ -4,21 +4,6 @@ title: jy-deloitte-exam-db-sys-api
 
 
 /v1:
-  /user: 
-    post:
-      description: Create Entry to the Accounts Table and UserDetails Table
-      body:
-        application/json:
-          type: !include schemas/post-user-request-schema.json
-          example: !include examples/post-user-request-example.json
-
-      responses:
-        201:
-          body:
-            application/json:
-              type: !include schemas/post-user-response-schema.json
-              example: !include examples/post-user-response-example.json
-
   /users : 
     get:
       description: Get All Users from the data source.
@@ -54,6 +39,21 @@ title: jy-deloitte-exam-db-sys-api
             application/json:
               type: !include schemas/error-schema.json
               example : !include examples/generic-error-example.json
+    /user: 
+      post:
+        description: Create Entry to the Accounts Table and UserDetails Table
+        body:
+          application/json:
+            type: !include schemas/post-user-request-schema.json
+            example: !include examples/post-user-request-example.json
+  
+        responses:
+          201:
+            body:
+              application/json:
+                type: !include schemas/post-user-response-schema.json
+                example: !include examples/post-user-response-example.json
+                
     /{username}:
       patch:
         description: Update a specific user

@@ -115,7 +115,7 @@ var totalCreatedUsers = vars.totalUsersToBeCreated - sizeOf(vars.failedUserList)
 output application/java
 var isUserCreated = (vars.totalUsersToBeCreated - sizeOf(vars.failedUserList)) == 0
 ---
-if(isUserCreated)400 else 201]]></ee:set-variable>
+if(isUserCreated)500 else 201]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<logger level="INFO" doc:name="Log End" doc:id="8fab4b47-1e1e-45a9-9aaf-a57198655b14" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\post-users-main-orchestration | START | Response : #[message.payload]"/>
@@ -251,7 +251,7 @@ sizeOf(attributes.headers."Security-Key") == 16]]></ee:set-variable>
 		<choice doc:name="Choice" doc:id="49f07e8d-9a2d-409c-be21-ed28318a5d9a" >
 			<when expression="#[!vars.authCheckResult]">
 				<logger level="INFO" doc:name="Log Invalid Security-Key Header" doc:id="648940d3-8c77-4eb2-8f44-8eda0888e2c7" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-security-header | MID | Invalid Security-Key Header"/>
-				<raise-error doc:name="Raise Auhorization Error" doc:id="00c7348e-66e7-4b62-85a3-fbe768e3e901" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+				<raise-error doc:name="Raise Auhorization Error" doc:id="00c7348e-66e7-4b62-85a3-fbe768e3e901" type="USER:UNAUTHORIZED" description="Invalid Security-Key Header"/>
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Log Valid Security-Key Header" doc:id="959b79a2-ae2f-416b-af73-0821a435d4b1" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-impl:\validate-security-header | MID | Valid Security-Key Header. Proceeding" />

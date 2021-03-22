@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="user-retrieval.xml" />
+	<munit:test name="get:\v1\users\(username)|positive-scenario" doc:id="472a79c7-a037-427e-a308-e4a7417dc8ba" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Get User by Username" doc:id="d8b46e2a-b8ae-42d8-9b18-a21ce6ba79ea" processor="db:query-single" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://user/retrieval/external/get-user-by-username-sql-result.json','application/json')]" mediaType="application/java" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<!-- <munit-tools:mock-when doc:name="Mock Get User by Username" doc:id="c02cd2ec-20b6-4040-b0f2-a736bc557550" processor="db:query-single">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['']" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when> -->
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="3493a84c-1424-4a3d-83b7-5e0dabbdd58a" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config" doc:id="163f3ca4-77cd-4fa0-b73c-7f41ec324742" name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Username field" doc:id="41ad8846-31a7-4cd8-99e5-2b2f9fff6a30" actual="#[payload.username]" expected="#['jeromevyabut']"/>
+			<munit-tools:assert-equals doc:name="Assert Http Status Code" doc:id="e420dc80-7cf7-4432-9dfe-0c7c3fd4722e" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\v1\users\(username)|negative-scenario-user-not-found" doc:id="68079622-6694-4df6-b689-2c6189ff3e6c" description="Test" expectedErrorType="USER:NOT_FOUND" expectedErrorDescription="jeromevyabut1 does not exist from the records">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get User by Username" doc:id="ad3f7efc-302d-4d81-9cc7-ef36f285b377" processor="db:query-single">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['']" mediaType="application/java" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[400]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="7dc18230-e3dc-4af2-b953-fe0929ecfd00" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut1' }}]" />
+
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config" doc:id="33420a16-169d-4dc5-97e0-04c6510097f4" name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get:\v1\users\(username)|db-connectivity-issue" doc:id="9d93261c-6252-433a-8c9a-7f8fde193d5b" description="Test" expectedErrorType="DB:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get User by Username DB Connectivity Error" doc:id="8159be6f-c375-46d1-8b88-60a822cd9cd6" processor="db:query-single" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['']" mediaType="application/java" />
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[400]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="cac610e1-72f9-49b1-a134-1166cf70180b" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut1' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config" doc:id="b0a3a931-d9d4-4c9b-ad48-699e25ba6921" name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get:\v1\users|positive-scenario" doc:id="9a6ab663-3499-4477-ae78-f7b55bc57394" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Get Active Users" doc:id="96f7e5cc-6b4e-4ad3-976a-2ec754261001" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get Active Users" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://user/retrieval/external/get-users-sql-result.json','application/json')]" mediaType="application/java" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+			<!-- <munit-tools:mock-when doc:name="Mock Get User by Username" doc:id="52cf2065-3f71-4fa7-911b-e346f5819dfe" processor="db:query-single">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['']" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when> -->
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="5bfecf3e-7ea9-47ff-9582-698ab7b591a5" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, queryParams : { 'show_all' : false, 'pageSize':10, 'pageNumber':1 }}]" />
+			
+</munit:set-event>
+			<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" doc:id="dcc6a46a-d976-40b2-804e-7c75d2fb7bdc" name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert count field" doc:id="4284f192-3803-4cb5-87ad-52908fa1e613" actual="#[payload.count]" expected="#[2]"/>
+			<munit-tools:assert-equals doc:name="Assert username field from entry 1" doc:id="5ca1bfd9-6f82-42e5-b18e-7bdfe65bb798" actual="#[payload.users[0].username]" expected="#['jeromevyabut']"/>
+			<munit-tools:assert-equals doc:name="Assert Http Status Code" doc:id="f629074d-82e1-4ee4-942c-1a10ea7cf0de" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\v1\users|negative-scenario-user-not-found" doc:id="c34d5953-0a6a-41fd-afd2-0892d60c54ca" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Get Active Users" doc:id="1e2c6cfc-d701-4655-a526-a49093266709" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get Active Users" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://user/retrieval/external/get-users-sql-no-result.json','application/json')]" mediaType="application/java" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+
+</munit-tools:mock-when>
+			<!-- <munit-tools:mock-when doc:name="Mock Get User by Username" doc:id="2711e93b-feed-4646-b205-d84808ddd618" processor="db:query-single">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#['']" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when> -->
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="9030bad4-8904-4d69-978a-824b40f01c8b" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, queryParams : { 'show_all' : false, 'pageSize':10, 'pageNumber':1 }}]" />
+			
+</munit:set-event>
+			<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" doc:id="a9062607-563c-4919-b7de-a096d0c653cb" name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert count field" doc:id="1ba52a1d-b6af-4a67-a545-3956182d61fb" actual="#[payload.count]" expected="#[0]"/>
+			<munit-tools:assert-equals doc:name="Assert Users count to Count field" doc:id="14c3f9ec-2d56-4e1d-8788-41424539ffdc" actual="#[sizeOf(payload.users)]" expected="#[0]"/>
+			<munit-tools:assert-equals doc:name="Assert Http Status Code" doc:id="e3185587-83ac-41ea-9e4d-63ac50d40a13" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\v1\users|db-connectivity-issue" doc:id="bdc23d82-3f19-482c-88a5-9e9b8db79410" description="Test" expectedErrorType="DB:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Active Users DB Connectivity Error" doc:id="84a90627-6fd1-4d8d-bc75-230db12f0b00" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get Active Users" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://user/retrieval/external/get-users-sql-no-result.json','application/json')]" mediaType="application/java" />
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="24b47266-2877-4712-88fc-5e3b3170889d" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, queryParams : { 'show_all' : false, 'pageSize':10, 'pageNumber':1 }}]" />
+			
+</munit:set-event>
+			<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" doc:id="dd31548f-03f8-475d-8e58-3d4f3c57550c" name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get:\v1\users|security-key-not-valid" doc:id="24829c11-91a9-4ba8-8b3d-81fe3973ee80" description="Test" expectedErrorType="USER:UNAUTHORIZED" expectedErrorDescription="Invalid Security-Key Header">
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="7316be1d-6c2d-47a1-9244-3bce5a0b385c" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg1234567891'}, queryParams : { 'show_all' : false, 'pageSize':10, 'pageNumber':1 }}]" />
+			
+
+</munit:set-event>
+			<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" doc:id="115146a8-cf27-4c4c-9419-8ce84c6db77c" name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration"/>
+		</munit:execution>
+	</munit:test>
+</mule>

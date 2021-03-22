@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config
+		name="user-retrieval.xml" />
+	<munit:test name="get:\v1\users\(username)|positive-scenario" doc:id="dd52cfc0-c144-4a2d-8130-09c096dfdd15" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Get User by Username" doc:id="7141b4ed-7ae4-4494-89a8-e7f287f27d20" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://user/retrieval/external/200-invoke-get-user-by-username-response.json','application/json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="3d15798a-3ccc-4b77-9db7-223420f187c3" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users\(username):jy-deloitte-exam-proc-api-config" doc:id="499b12cd-11f4-44fa-9e54-f37832fccb5b" name="get:\v1\users\(username):jy-deloitte-exam-proc-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Username field" doc:id="83a8410f-02d4-4166-b187-6115b4c1f77a" actual="#[payload.username]" expected="#['jeromevyabut']"/>
+			<munit-tools:assert-equals doc:name="Assert age field" doc:id="3331d9cc-f3cd-4237-bcd0-f1f57c45de83" actual="#[payload.age]" expected="#[27]"/>
+			<munit-tools:assert-equals doc:name="Assert dateRegistered to ensure format" doc:id="265b0c09-82e7-4f5b-9d3f-2ab6655a1ee6" actual="#[payload.dateRegistered]" expected="#['01-01-2021']"/>
+			<munit-tools:assert-equals doc:name="Assert Http Status Code" doc:id="9c950ed9-0c1d-4da2-a8b7-b3c2d6f9418e" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\v1\users\(username)|internal-error-scenario" doc:id="40d82fff-2178-4d2b-8f0f-c3ea0bdf4767" description="Test" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Get User by Username" doc:id="d4ec6f7c-abe3-4c3f-a0a9-21b0ab51736f" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://user/retrieval/external/500-invoke-get-user-by-username-response.json','application/json')]" mediaType="application/json" />
+					<munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[500]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="e88e6688-1fab-4c09-a24e-4cc5d76acf3a" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users\(username):jy-deloitte-exam-proc-api-config" doc:id="ca07ff4c-35d1-4872-a386-3cb3a28e80a6" name="get:\v1\users\(username):jy-deloitte-exam-proc-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get:\v1\users\(username)|negative-scenario-not-found" doc:id="9c34a052-5b38-45cd-9d5a-f37f5d6b2096" description="Test" expectedErrorType="HTTP:NOT_FOUND">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Get User by Username" doc:id="9390b7dd-39bd-4931-9e14-3486a32c03ad" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Get User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://user/retrieval/external/404-invoke-get-user-by-username-response.json','application/json')]" mediaType="application/json" />
+					<munit-tools:error typeId="HTTP:NOT_FOUND" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[404]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="558abe34-abb0-411f-8455-2c823f77420a" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users\(username):jy-deloitte-exam-proc-api-config" doc:id="9b07a4be-0397-49f5-b6f1-41950cc00bc4" name="get:\v1\users\(username):jy-deloitte-exam-proc-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get:\v1\users|positive-scenario" doc:id="3927c29f-1a97-4ce1-9cd1-dac83ae3d8a6" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Get Users" doc:id="82b0221f-d195-4837-94fa-847e6e021271" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Get Users" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://user/retrieval/external/200-invoke-get-users-response.json','application/json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+
+</munit-tools:mock-when>
+		
+</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="1cc48403-79da-4d9a-851a-75ae4eb044a2">
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, queryParams : { 'show_all' : false, 'pageSize':10, 'pageNumber':1 }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users:jy-deloitte-exam-proc-api-config" doc:id="6f5bc39c-192c-431c-95c3-b2c5294572ad" name="get:\v1\users:jy-deloitte-exam-proc-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert count field" doc:id="44144f05-de04-4e84-85f7-49e1e9acc979" actual="#[payload.count]" expected="#[1]"/>
+			<munit-tools:assert-equals doc:name="Assert age field from the list of users" doc:id="85d59d5c-cb5e-4b22-9a58-dd0b2cf0865b" actual="#[payload.users[0].age]" expected="#[27]"/>
+			<munit-tools:assert-equals doc:name="Assert dateRegistered to ensure format" doc:id="50bbd764-7ddd-440d-88be-7a3be4d5291d" actual="#[payload.users[0].dateRegistered]" expected="#['01-01-2021']"/>
+			<munit-tools:assert-equals doc:name="Assert Http Status Code" doc:id="7bea3774-9d18-4356-812f-b6fa11cd4fd9" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\v1\users|negative-scenario-unauthorized-security-key" doc:id="eb5746a8-6c4b-4cba-8a05-45b5c46deed5" description="Test" expectedErrorType="USER:UNAUTHORIZED">
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="db74a268-764d-4f01-94f3-4217c4d70376">
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg1234567890'}, queryParams : { 'show_all' : false, 'pageSize':10, 'pageNumber':1 }}]" />
+			
+</munit:set-event>
+			<flow-ref doc:name="get:\v1\users:jy-deloitte-exam-proc-api-config" doc:id="97451bc0-9810-40ad-ba87-afd7cbd4b5ab" name="get:\v1\users:jy-deloitte-exam-proc-api-config"/>
+		</munit:execution>
+	
+</munit:test>
+<munit:test name="get:\v1\users|internal-error-scenario" doc:id="94c2b46f-8593-4e3d-8d9d-dcf0c9fe04f3" description="Test" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Get Users" doc:id="f41c1b6f-4163-412a-8f9b-664188d03dee" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Get Users" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://user/retrieval/external/500-invoke-get-users-response.json','application/json')]" mediaType="application/json" />
+					<munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[500]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+
+
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="7f8a1160-8000-4cae-a18b-8b75675be9f6" >
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\v1\users:jy-deloitte-exam-proc-api-config" doc:id="fca9cbbf-d412-451d-b41d-87e20d48579d" name="get:\v1\users:jy-deloitte-exam-proc-api-config" />
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

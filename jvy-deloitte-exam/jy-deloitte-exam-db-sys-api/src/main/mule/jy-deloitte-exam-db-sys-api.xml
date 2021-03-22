@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <apikit:config name="jy-deloitte-exam-db-sys-api-config" api="jy-deloitte-exam-db-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="jy-deloitte-exam-db-sys-api-main">
         <http:listener config-ref="jy-deloitte-exam-db-sys-api-httpListenerConfig" path="/api/*">
@@ -13,19 +12,19 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
             </http:error-response>
         </http:listener>
         <ee:transform doc:name="Set logCorrId Variable" doc:id="0daca0b8-12ca-4919-b440-cba3ccec8057">
-			<ee:message />
-			<ee:variables>
-				<ee:set-variable variableName="logCorrId"><![CDATA[%dw 2.0
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="logCorrId"><![CDATA[%dw 2.0
 output application/java
 ---
 if(attributes.headers.'correlation-id' != null) attributes.headers.'correlation-id' else correlationId]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\validate-auth-header" doc:id="2ec8df53-4d20-4ba5-99a2-1ec8e73981ea" name="jy-deloitte-exam-db-sys-api-impl:\validate-auth-header"/>
-		<apikit:router config-ref="jy-deloitte-exam-db-sys-api-config" />
-		<error-handler>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\validate-auth-header" doc:id="2ec8df53-4d20-4ba5-99a2-1ec8e73981ea" name="jy-deloitte-exam-db-sys-api-impl:\validate-auth-header" />
+        <apikit:router config-ref="jy-deloitte-exam-db-sys-api-config" />
+        <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -38,7 +37,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -51,7 +50,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -64,7 +63,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -77,7 +76,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -90,7 +89,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -117,7 +116,7 @@ output application/json
         <apikit:console config-ref="jy-deloitte-exam-db-sys-api-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -132,15 +131,15 @@ output application/json
         </error-handler>
     </flow>
     <flow name="patch:\v1\users\(username):application\json:jy-deloitte-exam-db-sys-api-config">
-		<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\patch-user-by-username-main-orchestration" doc:id="59105768-611e-4e02-9d70-2bcac9ce48c7" name="jy-deloitte-exam-db-sys-api-impl:\patch-user-by-username-main-orchestration"/>
+        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\patch-user-by-username-main-orchestration" doc:id="59105768-611e-4e02-9d70-2bcac9ce48c7" name="jy-deloitte-exam-db-sys-api-impl:\patch-user-by-username-main-orchestration" />
     </flow>
     <flow name="get:\v1\users:jy-deloitte-exam-db-sys-api-config">
-        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" doc:id="b6ea43d8-e58e-485e-a9e2-d185b12b207e" name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration"/>
+        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" doc:id="b6ea43d8-e58e-485e-a9e2-d185b12b207e" name="jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration" />
     </flow>
     <flow name="get:\v1\users\(username):jy-deloitte-exam-db-sys-api-config">
-        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-user-by-username-main-orchestration" doc:id="9c3fdbec-043e-4bf6-9046-1a2d1f09b917" name="jy-deloitte-exam-db-sys-api-impl:\get-user-by-username-main-orchestration"/>
+        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\get-user-by-username-main-orchestration" doc:id="9c3fdbec-043e-4bf6-9046-1a2d1f09b917" name="jy-deloitte-exam-db-sys-api-impl:\get-user-by-username-main-orchestration" />
     </flow>
-    <flow name="post:\v1\user:application\json:jy-deloitte-exam-db-sys-api-config">
-        <flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\post-user-main-orchestration" doc:id="ff540070-41df-455f-9d43-2c4cf3b15ade" name="jy-deloitte-exam-db-sys-api-impl:\post-user-main-orchestration"/>
+    <flow name="post:\v1\users\user:application\json:jy-deloitte-exam-db-sys-api-config">
+		<flow-ref doc:name="jy-deloitte-exam-db-sys-api-impl:\post-user-main-orchestration" doc:id="ff540070-41df-455f-9d43-2c4cf3b15ade" name="jy-deloitte-exam-db-sys-api-impl:\post-user-main-orchestration" />
     </flow>
 </mule>

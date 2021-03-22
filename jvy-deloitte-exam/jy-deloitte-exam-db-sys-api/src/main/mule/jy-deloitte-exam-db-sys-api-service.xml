@@ -120,6 +120,14 @@ FETCH NEXT :pageSize ROWS ONLY ;
 		</db:select>
 			</otherwise>
 		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="d03d6b36-56f6-40f4-b794-d077ef9b81d6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<logger level="INFO" doc:name="Log End" doc:id="276d240f-29ba-4bc1-a568-0e21a6f58fb2" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-service:\invoke-get-users-sql | END | DB User Retrieval Success" />
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="Query Execution Errors" doc:id="9a40e7a8-34cf-4ee8-aea2-1568fbac8a0b" type="DB:QUERY_EXECUTION">

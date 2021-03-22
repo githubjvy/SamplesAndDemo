@@ -59,7 +59,6 @@ output application/json
 output application/json
 ---
 {
-   internalErrorCode:"4001",
    errorMessage: error.description
 }]]></ee:set-payload>
 								</ee:message>
@@ -113,7 +112,6 @@ output application/json
 output application/json
 ---
 {
-   internalErrorCode:"4002",
    errorMessage: error.description
 }]]></ee:set-payload>
 								</ee:message>
@@ -169,6 +167,12 @@ output application/json
 	}
 }]]></ee:set-payload>
 			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+200]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
 		<logger level="INFO" doc:name="Log End" doc:id="5c47ccf5-dbd4-482a-a203-dc98171b1951" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-impl:\get-users-main-orchestration | END | Response : #[message.payload]" />
 	</sub-flow>
@@ -184,10 +188,10 @@ output application/java
 attributes.headers.Authorization == p('secure::http.auth')]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<choice doc:name="Choice" doc:id="5b28b182-53c5-411b-9f46-74130de9fb36" >
+		<choice doc:name="Check result" doc:id="5b28b182-53c5-411b-9f46-74130de9fb36" >
 			<when expression="#[!vars.authCheckResult]">
 				<logger level="INFO" doc:name="Log Invalid Authorization Header" doc:id="e0b3a388-b045-474f-9aef-e9f99166e121" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-impl:\validate-auth-header | MID | Invalid Authorization Header"/>
-				<raise-error doc:name="Raise Auhorization Error" doc:id="cb2506ea-5cb7-4328-a82d-8f9ae118f7b5" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+				<raise-error doc:name="Raise Authorization Error" doc:id="cb2506ea-5cb7-4328-a82d-8f9ae118f7b5" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Log Valid Authorization Header" doc:id="5c159c85-bdc1-4716-8a24-0001c07fb3f9" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-impl:\validate-auth-header | MID | Valid Authorization Header. Proceeding" />
@@ -222,10 +226,10 @@ output application/java
 sizeOf(attributes.headers."Security-Key") == 16]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<choice doc:name="Choice" doc:id="aeccf863-45c9-493e-b5f7-07ddae682133" >
+		<choice doc:name="Check result" doc:id="aeccf863-45c9-493e-b5f7-07ddae682133" >
 			<when expression="#[!vars.authCheckResult]">
 				<logger level="INFO" doc:name="Log Invalid Security-Key Header" doc:id="74141d5a-9f64-42c9-bc9f-d5bd81b56ac2" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-impl:\validate-security-header | MID | Invalid Security-Key Header"/>
-				<raise-error doc:name="Raise Auhorization Error" doc:id="b52b051b-334a-466e-90cd-d0a0be426667" type="USER:UNAUTHORIZED" description="Invalid Authorization Header"/>
+				<raise-error doc:name="Raise Authorization Error" doc:id="b52b051b-334a-466e-90cd-d0a0be426667" type="USER:UNAUTHORIZED" description="Invalid Security-Key Header"/>
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Log Valid Security-Key Header" doc:id="6824608a-29b5-4185-8345-34182eccd5a2" message="#[vars.logCorrId] | jy-deloitte-exam-db-sys-api-impl:\validate-security-header | MID | Valid Security-Key Header. Proceeding" />
@@ -273,7 +277,7 @@ output application/json
 output application/json
 ---
 {
-	message:"Username:" ++ vars.username ++ " has been updated."
+	message:"Username: " ++ vars.username ++ " has been updated."
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>

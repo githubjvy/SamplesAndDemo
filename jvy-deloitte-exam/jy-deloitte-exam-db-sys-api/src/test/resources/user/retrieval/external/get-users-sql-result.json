@@ -1,0 +1,22 @@
+[
+  {
+    "birthday": "1994-01-06T00:00:00",
+    "accountId": 101,
+    "gender": "M",
+    "active": true,
+    "fullName": "Jerome Yabut",
+    "userId": 1001,
+    "date_registered": "2021-01-01T00:00:00",
+    "username": "jeromevyabut"
+  },
+  {
+    "birthday": "1994-01-06T00:00:00",
+    "accountId": 102,
+    "gender": "M",
+    "active": true,
+    "fullName": "Jerome Yab",
+    "userId": 1002,
+    "date_registered": "2021-01-01T00:00:00",
+    "username": "jeromevyabut2"
+  }
+]

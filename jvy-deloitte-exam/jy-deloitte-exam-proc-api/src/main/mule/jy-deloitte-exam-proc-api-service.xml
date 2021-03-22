@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api" doc:id="3d783f55-2ab6-41ed-8e76-ae65a4635ef9" >
 		<logger level="INFO" doc:name="Log Start" doc:id="55084e4d-c791-4bc9-a963-5aee6c9b3590" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api | START | Request : #[message.payload]" />
-		<http:request method="POST" doc:name="Invoke Create User" doc:id="ad3313e9-9d71-4944-a572-cdc502ff71fc" config-ref="DB_System_API_HTTP_Request_configuration" path="/user">
+		<http:request method="POST" doc:name="Invoke Create User" doc:id="ad3313e9-9d71-4944-a572-cdc502ff71fc" config-ref="DB_System_API_HTTP_Request_configuration" path="/users/user">
 		</http:request>
 		<logger level="INFO" doc:name="Log End" doc:id="335ea46e-418e-451e-bafa-06686db447ee" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-db-sys-api | END | Response : #[message.payload]" />
 		<error-handler >
@@ -47,7 +47,7 @@ output application/json
 	</flow>
 	<flow name="jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api" doc:id="f6e379ba-086f-4838-8171-3e3a77f54561" >
 		<logger level="INFO" doc:name="Log Start" doc:id="d0557462-4143-4596-9ccc-5c82eb1aeadc" message="#[vars.logCorrId] | jy-deloitte-exam-proc-api-service:\invoke-post-user-jy-deloitte-exam-proc-api | START | Request : #[message.payload]" />
-		<http:request method="POST" doc:name="Invoke Create User" doc:id="c8ae4ee1-5925-4109-a9df-9fe4c9d4d455" config-ref="Proc_API_HTTP_Request_configuration" path="/users/user" >
+		<http:request method="POST" doc:name="Invoke Create User Proc API" doc:id="c8ae4ee1-5925-4109-a9df-9fe4c9d4d455" config-ref="Proc_API_HTTP_Request_configuration" path="/users/user" >
 			<http:headers ><![CDATA[#[output application/java
 ---
 {

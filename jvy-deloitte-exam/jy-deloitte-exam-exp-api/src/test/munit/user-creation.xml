@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="user-creation.xml" />
+	<munit:test name="post:\v1\users\user|positive-scenario"
+		doc:id="9131614d-a050-4ea1-82f6-33305be205ef" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Create User" doc:id="0fbc3228-e809-4f2e-a96a-e8abc02f9538" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Create User" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user/retrieval/external/201-invoke-create-user-response.json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[201]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="72c6cde0-c6d8-447e-aeb8-764df2c3bfb7">
+				<munit:payload value="#[MunitTools::getResourceAsString('user/creation/post-user-success-request-example.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="post:\v1\users\user:application\json:jy-deloitte-exam-exp-api-config" doc:id="19352a36-f925-4306-bf76-dd15acb29c8c" name="post:\v1\users\user:application\json:jy-deloitte-exam-exp-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Message" doc:id="2dfb238b-926e-4a2d-9781-f9b730bb4a03" actual="#[payload.message]" expected="#['Username: jeromevyabut has been successfully created.']"/>
+			<munit-tools:assert-equals doc:name="Assert Response Code 201" doc:id="eec545b5-a9fc-493d-a5c0-46c2888258c9" actual="#[vars.httpStatus]" expected="#[201]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\v1\users\user|negative-scenario-user-already-exist" doc:id="7df21ca7-c317-46a0-a34e-458a60a8f334" description="Test" expectedErrorType="HTTP:BAD_REQUEST">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Create User" doc:id="759118eb-8a13-4d26-ac2c-85152caa45a5" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Create User" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user/retrieval/external/400-invoke-create-user-response.json')]" mediaType="application/json" />
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[400]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="9b57fd98-8fba-473e-9b64-a649e60631a4">
+				<munit:payload value="#[MunitTools::getResourceAsString('user/creation/post-user-success-request-example.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="post:\v1\users\user:application\json:jy-deloitte-exam-exp-api-config" doc:id="a71cc70c-02f0-4043-a284-7360e30c725f" name="post:\v1\users\user:application\json:jy-deloitte-exam-exp-api-config"/>
+		</munit:execution>
+</munit:test>
+	<munit:test name="post:\v1\users\user|internal-error-scenario" doc:id="ef89d873-e8f9-4727-b352-0883f8cfd87e" description="Test" expectedErrorType="HTTP:INTERNAL_SERVER_ERROR">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Create User" doc:id="5c00a34a-8af4-4afd-81d3-233a03db8dfa" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Create User" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user/retrieval/external/500-invoke-create-user-response.json')]" mediaType="application/json" />
+					<munit-tools:error typeId="HTTP:INTERNAL_SERVER_ERROR" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[500]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="4c1d6c46-ba11-44ef-bafc-35a9569fd828">
+				<munit:payload value="#[MunitTools::getResourceAsString('user/creation/post-user-success-request-example.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="post:\v1\users\user:application\json:jy-deloitte-exam-exp-api-config" doc:id="9aba9088-39f1-49be-94cf-62fc70b8285a" name="post:\v1\users\user:application\json:jy-deloitte-exam-exp-api-config"/>
+		</munit:execution>
+</munit:test>
+<munit:test name="post:\v1\users|positive-scenario"
+		doc:id="51c6384d-2a56-4f72-8f17-adea5b4566eb" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Create Users" doc:id="efb5651c-94b4-4025-ba32-7e9759d8f073" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Create Users" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user/retrieval/external/201-invoke-create-users-response.json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[202]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="9d6fd0d1-5560-48ce-bd5e-8521376c64c7">
+				<munit:payload value="#[MunitTools::getResourceAsString('user/creation/post-users-success-request-example.json')]" mediaType="application/json" />
+
+			</munit:set-event>
+			<flow-ref doc:name="post:\v1\users:application\json:jy-deloitte-exam-exp-api-config" doc:id="d335685c-4639-4c4f-a144-76e5f635a835" name="post:\v1\users:application\json:jy-deloitte-exam-exp-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Message" doc:id="53297596-7341-415c-9cee-004c9e862521" actual="#[payload.message]" expected="#['Multiple Users for Creation has been processed']"/>
+			<munit-tools:assert-equals doc:name="Assert Response Code 201" doc:id="376e2377-db42-4fb1-a11a-544ec1cc1d78" actual="#[vars.httpStatus]" expected="#[202]"/>
+		</munit:validation>
+	</munit:test>
+
+
+
+</mule>

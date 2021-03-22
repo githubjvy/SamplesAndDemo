@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="user-activation-deactivation.xml" />
+	<munit:test name="patch:\v1\users\(username)\activate|positive-scenario"
+		doc:id="788f73a1-7bf2-4bcb-a9b5-522220fadad3" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Patch User by Username" doc:id="8756a0b3-7849-441b-9bb2-3c93c1589f93" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Patch User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user/retrieval/external/200-invoke-patch-user-by-username-response.json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		
+</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="0422c53e-ddf5-40f3-b3e9-8aa436443ba1">
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="patch:\v1\users\(username)\activate:jy-deloitte-exam-exp-api-config" doc:id="f1c9bbff-f522-48d9-9201-907d5dbb72c4" name="patch:\v1\users\(username)\activate:jy-deloitte-exam-exp-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Message" doc:id="f82cd199-507e-4745-982f-abae61e455f6" actual="#[payload.message]" expected="#['Username : jeromevyabut has been activated.']"/>
+			<munit-tools:assert-equals doc:name="Assert Response Code 200" doc:id="4116235d-5118-4b59-910d-20420a68660b" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="patch:\v1\users\(username)\deactivate|positive-scenario"
+		doc:id="cff6bdd0-6bb8-48bc-9756-e2e4805dadb4" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Invoke Patch User by Username" doc:id="ca4947d0-f119-4b6f-a8bf-ad711601e045" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Invoke Patch User by Username" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('user/retrieval/external/200-invoke-patch-user-by-username-response.json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="httpStatus" value="#[200]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		
+</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Incoming Event" doc:id="9cc3ba56-41ac-4575-90b2-e7f8d80ac27e">
+				<munit:payload value="#['']" mediaType="application/json" />
+				<munit:attributes value="#[{ method : 'GET', headers : { 'Security-Key' : 'abcdefg123456789'}, uriParams : { 'username' : 'jeromevyabut' }}]" />
+			</munit:set-event>
+			<flow-ref doc:name="patch:\v1\users\(username)\deactivate:jy-deloitte-exam-exp-api-config" doc:id="128236cc-fd5f-4db6-8ab0-e26184b8dac3" name="patch:\v1\users\(username)\deactivate:jy-deloitte-exam-exp-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Message" doc:id="b6e923e5-5e96-43ef-b7c8-6a40b3b70d37" actual="#[payload.message]" expected="#['Username : jeromevyabut has been deactivated.']"/>
+			<munit-tools:assert-equals doc:name="Assert Response Code 200" doc:id="df1fd1c8-cebf-4afa-be9f-0535d3d1b30b" actual="#[vars.httpStatus]" expected="#[200]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
